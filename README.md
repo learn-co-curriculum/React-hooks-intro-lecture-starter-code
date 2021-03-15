@@ -1,156 +1,192 @@
-# React-Props-Components
+# React-Hooks
 
 ## SWBATs
 
-* Learn how to identify components on a page, visually
-* Understand how create-react-app works and what it offers a developer
-* Get more familiarity with component hierarchy and the flow of information
-    * Learn props 
-
-## Resources
-
-* [Example Video](http://youtu.be/Sjla00Wrj20) - old video(before flipping)
+* Understand how react hooks are used to declare and update the state
+* Use `useEffect()` to replace `componentDidMount()` lifecycle method
 
 ## Outline
 
-    10m Identify Components
-    10m create-react-app
-    20m Passing Props
-     5m CFU: Solidfying props
-    10m Class component
-     5m Difference between Class Component and functional component
+    10m What are hooks?
+    10m `useState()`
+    15m `useEffect()`
+    10m CFU: `useState()` to add votes
     ===
-    60m Total
+    45m Total
 
-### Identify Components
+### What are hooks?
 
-When building React Apps I think it's super helpful to wireframe out what you are building and start identifying what is a component. I use [a web whiteboard](https://www.awwapp.com) to draw different colored squares around what will be a component in these pre-made images (made with free trial of balsamic that i took screenshots of). I'll show the first image and have students start identifying what they think is a component.
+To hook react class functionality to a functional component. Find more details [here](https://reactjs.org/docs/hooks-overview.html)
 
-<img src="./public/props_and_components.png" width="300" />
-<img src="./public/props_and_components_example.png" width="300" />
+- Introduced: React v16.8.0
+- Hooks are functions that let you “hook into” React state and lifecycle features from function components.
+- This makes development easier and improves performance. 
+- Migrating code to use hooks is easy.
+- No need of using class components any more!
+- Hooks are only used inside a functional component.
 
-In this app we'll use the JSON data in src/painting_data.js to mimic data we'd be getting from an API. For the moment, advice to ignore the 'votes' part.
+### useState()
 
-Talk about why you might need a PaintingList Component, single responsibility, it's job is to receive some data and render out individual Painting components (or PaintingItem or PaintingCard or whatever you want to call it).
-
-### create-react-app
-
-Show how `create-react-app` works
-
-* `npm install -g create-react-app` (if they haven't)
-* `create-react-app my-app` cd into it.
-* `npm install --save semantic-ui-css` talk about what the --save does (adds to package.json, why do we care, etc.)
-* _Get rid of everything in c-r-a that we don't know what it is. Service workers, css, tests... delete it all_
-* Build out static version of the app with right component structure. (bring in Navbar component from previous lecture) Mention that often in React there's like a certain minimum amount of boilerplate needed to be written to get your app up and rendering. I would make components such as
-
-**Note: With new version of react there is no need to import react package in functional components**
+- create state color which is red and change it when button is clicked.
 
 ```js
+// App.js
+import { useState } from 'react';
+import 'semantic-ui-css/semantic.min.css';
+import NavBar from './NavBar';
+import PaintingsList from './PaintingsList';
+import paintings from './painting_data';
 
-const PaintingList = () => {
-  return <div>PaintingList</div>;
+function App() {
+
+const [color, setColor] = useState("red") // State
+
+return (
+  <div>
+    <NavBar
+      color={color}
+      title="Paintr"
+      icon="paint brush"
+      description="an app we made"
+    />
+    <button onClick={() => setColor("blue")}>Change color</button>
+
+    <PaintingsList paintings={paintings} />
+  </div>
+  );
+}
+
+export default App;
+```
+- Change state color from NavBar component.
+
+```js
+// App.js
+import { useState } from 'react';
+import 'semantic-ui-css/semantic.min.css';
+import NavBar from './NavBar';
+import PaintingsList from './PaintingsList';
+import paintings from './painting_data';
+
+function App() {
+
+const [color, setColor] = useState("red") // State
+
+const changeColor = () => {
+  setColor("blue")
+}
+
+return (
+  <div>
+    <NavBar
+      color={color}
+      title="Paintr"
+      icon="paint brush"
+      description="an app we made"
+      changeColor={changeColor}
+    />
+    <PaintingsList paintings={paintings} />
+  </div>
+  );
+}
+
+export default App;
+
+// NavBar.js
+
+const NavBar = props => {
+return (
+  <div className={`ui inverted ${props.color} menu`}>
+    <a className="item">
+      <h2 className="ui header">
+        <i className={`${props.icon} icon`} />
+        <div className="content">{props.title}</div>
+        <div className="sub header">{props.description}</div>
+      </h2>
+    </a>
+    <button onClick={props.changeColor}>Change color</button>
+  </div>
+  );
 };
 
-export default PaintingList;
+export default NavBar;
 ```
 
-so you can see things rendering correctly on page. Reminder that these are _just functions_. A bit different than class-based components seen in labs, but very very similar and all we have seen in lecture thus far. (Students will continue to have confusion over functional components though I show them every lecture, a deficiency in the curriculum?)
+### useEffect()
 
-### Passing Props
-
-In a top level component like App import the json data from painting_data and show that you can console.log it (in render) and have access to it. Ask the question of how you are going to get this data to the other components that need to know about it?
-
-The answer, via props. _There is one way to pass data from one component to another in React, that is props. They go one direction, down from parent to child. In lecture 1, we passed props as arguments to a function. Even when using JSX that's really how you should think of props._ **Props are like arguments to a function. A component does not own it's own props they are passed to it from outside.** This is in contrast to state which we'll talk about next.
-
-Pass the props from App to PaintingList and console.log them again. Now you are in a situation where you have an array of plain JS objects. What you want back is an array of the same number of elements, but each element should be a React component. What function does that sound like? `map`! We'll use `map` here for the same reason we would use map to take an array of numbers and double each number.
+- Use `useEffect()` to fetch data from json server. First don't pass second argument and show network tab that how `fetch` is making request infinite times. Explain how to use of second argument for different lifecycle method.
 
 ```js
-// ====================================
-// Step 1
-// PaintingList.js
-// see the same number of things we should expect
+useEffect(() => console.log("mounted or updated / rendered"))
+useEffect(() => console.log("mounted"),[])
+useEffect(() => console.log("State changed"),[state.value])
+useEffect(() => {
+    return () => {
+    console.log('will unmount');
+  }
+}, [])
+```
+- fetching paintings:
 
-const PaintingList = (props) => {
+```js
+// App.js
 
-  return (
-    <div>
-    {props.paintings.map(painting => <li>hi</li>)}
-    </div>
-  )
-}
+import { useState, useEffect } from 'react';
+import 'semantic-ui-css/semantic.min.css';
+import NavBar from './NavBar';
+import PaintingsList from './PaintingsList';
+// import paintings from './painting_data'
 
-export default PaintingList
+function App() {
 
-// ====================================
-// Step 2
-// PaintingList.js
-// render Painting Components
-import Painting from './Painting'
+  const [color, setColor] = useState("red") // State
+  const [paintings, setPaintings] = useState([]) // State
 
-const PaintingList = (props) => {
+  useEffect(() => {
+    fetch("http://localhost:3000/paintings")
+    .then(res => res.json())
+    .then(paintings => setPaintings(paintings))
+  },[]) // ComponentDidMount
 
-  return (
-    <div>
-    {props.paintings.map(painting => <Painting />)}
-    </div>
-  )
-}
-
-export default PaintingList
-
-//Painting.js
-
-const Painting = (props) => {
-  return <div>Painting Component</div>
-}
-
-export default Painting
-
-// ====================================
-// Step 3
-// show the titles
-import Painting from './Painting'
-
-const PaintingList = (props) => {
+  const changeColor = () => {
+    setColor("blue")
+  }
 
   return (
     <div>
-    {props.paintings.map(painting => <Painting title={painting.title}/>)}
+      <NavBar
+        color={color}
+        title="Paintr"
+        icon="paint brush"
+        description="an app we made"
+        changeColor={changeColor}
+      />
+      {/* updating the state*/}
+      {/* <button onClick={() => setColor("blue")}>Change color</button>  */}
+
+      <PaintingsList paintings={paintings} />
     </div>
-  )
+  );
 }
 
-export default PaintingList
+export default App;
 
-//Painting.js
+```
 
-const Painting = (props) => {
-  return <div>{props.title}</div>
-}
+### CFU: `useState()` to add votes
 
-export default Painting
+Task: Display votes and add votes using `useState()`
 
-// ====================================
-// Step 4
-// fill out Painting Component
-// maybe discuss why it's nicer to pass a prop 'painting'
-// vs. a title prop, image prop, artist name prop, dimension prop, etc.
-import Painting from './Painting'
+Solution:
+```js
+// Painting.js
 
-const PaintingList = (props) => {
+import { useState } from "react";
 
-  return (
-    <div>
-    {props.paintings.map(painting => <Painting painting={painting}/>)}
-    </div>
-  )
-}
+const Painting = props => {
 
-export default PaintingList
+  const [votes, addVote] = useState(props.painting.votes)
 
-//Painting.js
-
-const Painting = (props) => {
   return (
     <div>
       <img src={props.painting.image} />
@@ -161,144 +197,20 @@ const Painting = (props) => {
       <p>
         Dimensions: {props.painting.dimensions.width} in. x {props.painting.dimensions.height} in.
       </p>
+
+      <div class="ui labeled button" tabindex="0">
+          <div class="ui red button" onClick={() => addVote(votes+1)}>
+            <i class="heart icon"></i> Add Vote
+          </div>
+          <a class="ui basic red left pointing label">
+            {votes}
+          </a>
+      </div>
     </div>
-  )
-}
-
-export default Painting
-```
-
-Cover the whole flow again, how props get passed down multiple levels, get mapped over, etc. Briefly talk about the `key` prop warning. Basically it's for React's internal workings so it can quickly know what components to update when it's doing that thing of updating the real DOM to look like the virtual DOM
-
-If you want to make the Painting Component look fancy here's some markup: (_NOTE: this also adds the vote button we will use later_)
-
-```js
-<div className="item">
-  <div className="ui small image">
-    <img src={props.painting.image} alt={props.painting.slug} />
-  </div>
-  <div className="middle aligned content">
-    <div className="header">{`"${props.painting.title}" by ${
-      props.painting.artist.name
-    }`}</div>
-    <div className="description">
-      <a>
-        <i className="large caret up icon" />
-        {props.painting.votes} votes
-      </a>
-    </div>
-  </div>
-</div>
-```
-
-### CFU: Solidfying props
-
-Ask students to create component for NavBar(see following question) and pass color="red", title="Paintr", icon="paint brush", and description="an app we made" as props from app component.
-
-**Note: make sure to import `semantic-ui-css/semantic.min.css` package in app component for styling.=**
-
-Question:
-
-```js
- const NavBar = props => {
-  return (
-    <div className={"ui inverted red menu"}>
-      <a className="item">
-        <h2 className="ui header">
-          <i className={"paint brush icon"} />
-          <div className="content">Paintr</div>
-          <div className="sub header">an app we made</div>
-        </h2>
-      </a>
-    </div>
+      
   );
 };
 
-export default NavBar;
+export default Painting;
+
 ```
-
-```js
-//App.js
-
-import 'semantic-ui-css/semantic.min.css';
-import NavBar from './NavBar';
-import PaintingsList from './PaintingsList';
-import paintings from './painting_data'
-
-
-
-function App() {
-  return (
-    <div>
-      <NavBar
-        color="red"
-        title="Paintr"
-        icon="paint brush"
-        description="an app we made"
-      />
-      <PaintingsList paintings={paintings} />
-    </div>
-  );
-}
-
-export default App;
-
-
-//NavBar.js
-const NavBar = props => {
-  return (
-    <div className={`ui inverted ${props.color} menu`}>
-      <a className="item">
-        <h2 className="ui header">
-          <i className={`${props.icon} icon`} />
-          <div className="content">{props.title}</div>
-          <div className="sub header">{props.description}</div>
-        </h2>
-      </a>
-    </div>
-  );
-};
-
-export default NavBar;
-```
-
-Discuss solution with students.
-
-Maybe take a break, move on to class component
-
-### Intro to Class Component
-
-Convert `PaintingsList.js` compoent to class compoent. 
-
-```js
-import React from 'react';
-import Painting from './Painting';
-
-class PaintingsList extends React.Component{
-  render(){
-    return(<div>
-       <h1>Paintings</h1>
-      {
-      this.props.paintings.map(painting => (
-        <Painting
-          key={painting.id}
-          painting={painting}
-        />
-      ))
-      }
-    </div>)
-  }
-}
-
-export default PaintingsList;
-```
-
-Explain:
-* Difference in syntax
-    * `extends React.Component`
-    *  `render()`
-* Difference in how to access the props
-    * `props` vs `this.props`
-* Difference between class component and functional component
-    * when to use which type of component
-    * You can talk briefly about `state` to give a starting for next lecture
